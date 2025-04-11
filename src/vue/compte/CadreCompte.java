@@ -20,7 +20,7 @@ import baseDonnees.modeles.Utilisateur;
 import modele.Banque;
 import vue.GestionnaireVue;
 
-public class CadreCompte extends JFrame implements ActionListener {
+public class CadreCompte extends JFrame implements ActionListener, observer.MonObserver {
     private static final long serialVersionUID = 1L;
     private GestionnaireVue gestionnaireVue;
     private JButton nouvelleTransactionButton;
@@ -33,9 +33,11 @@ public class CadreCompte extends JFrame implements ActionListener {
     Color vertFonce = new Color(42, 71, 50);
     Utilisateur utilisateurActif = null;
     Banque banque = Banque.getInstance();
+    private DefaultTableModel[] tableModel = {null};
 
     public CadreCompte(GestionnaireVue gestionnaireVue) {
         this.gestionnaireVue = gestionnaireVue;
+        banque.attacherObserver(this);
 
         setTitle("Compte Bancaire");
         setSize(800, 600);
@@ -156,7 +158,6 @@ public class CadreCompte extends JFrame implements ActionListener {
         /* Puisque java ne supporte pas l'approche "pass-by-reference" de C, il faut utiliser un tableau
         pour atteindre le meme effet qu'un pass-by-reference. Ceci est la meilleure facon que j'ai trouve
         de changer tableModel dans la helper method */
-        DefaultTableModel[] tableModel = {null};
         window.add(createTable(tableModel), gbc);
         /* FIN SECTION TABLE PANEL */
 
@@ -173,7 +174,9 @@ public class CadreCompte extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == nouvelleTransactionButton) {
-            /*! TON CODE ICI MOHAMED !*/
+            // Ouvrir la fenêtre de dialogue pour une nouvelle transaction
+            DialogueTransaction dialogue = new DialogueTransaction(this);
+            dialogue.setVisible(true);
         } else if (e.getSource() == deconnexionButton) {
             banque.deconnecterUtilisateur();
             gestionnaireVue.activerModeConnexion();
@@ -264,6 +267,16 @@ public class CadreCompte extends JFrame implements ActionListener {
             Object[] rowData = {noCompteSource, noCompteDestination, montant, status};
             
             tableModel[0].addRow(rowData);
+        }
+    }
+    @Override
+    public void avertir() {
+        // Mise à jour des informations affichées
+        updateInfoLabel();
+
+        // Vérifier si l'utilisateur est connecté avant de mettre à jour la table
+        if (banque.estConnecte()) {
+            updateTable(tableModel);
         }
     }
 }
