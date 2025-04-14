@@ -5,19 +5,10 @@ import javax.swing.*;
 import modele.Banque;
 import vue.GestionnaireVue;
 
-/**
- * Panneau de connexion pour l'authentification d'utilisateur.
- * 
- * @author Tristan Larue | ETS
- * @version H2025
- *
- */
-
- public class CadreConnexion extends JFrame implements ActionListener {
+public class CadreConnexion extends JFrame implements ActionListener {
     private static final long serialVersionUID = 1L;
     private GestionnaireVue gestionnaireVue;
     private JPanel panneauPrincipal;
-    private JLabel lblTitre;
     private JLabel lblNomUtilisateur;
     private JTextField txtNomUtilisateur;
     private JLabel lblMotDePasse;
@@ -25,72 +16,79 @@ import vue.GestionnaireVue;
     private JButton btnConnexion;
     private JLabel lblMessageErreur;
     
-    // Constructeur
+    // Constructor
     public CadreConnexion(GestionnaireVue gestionnaireVue) {
         this.gestionnaireVue = gestionnaireVue;
         
-        // Config de la fenêtre
-        setTitle("Connexion - Application Bancaire");
-        setSize(400, 300);
+        // fenetre
+        setTitle("Connexion");
+        setSize(350, 250);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); //Mettre au centre!
+        setLocationRelativeTo(null); // Centre la fenêtre
         initialiserComposants();
     }
-    //Initialiser le panneau
+    
+    // Initialisation du panel
     private void initialiserComposants() {
         panneauPrincipal = new JPanel(new GridBagLayout());
         panneauPrincipal.setBackground(Color.DARK_GRAY);
         
-        // Config des contrainte
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5,5,5,5);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
         
-        // Config du titre
-        lblTitre = new JLabel("Bienvenu dans la banque!");
-        lblTitre.setForeground(Color.WHITE);
+        // username label
+        lblNomUtilisateur = new JLabel("Nom utilisateur");
+        lblNomUtilisateur.setForeground(Color.WHITE);
+        lblNomUtilisateur.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 2;
-        panneauPrincipal.add(lblTitre, gbc);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        panneauPrincipal.add(lblNomUtilisateur, gbc);
         
-        // username
-        lblNomUtilisateur = new JLabel("Nom dutilisateur: ");
-        lblNomUtilisateur.setForeground(Color.WHITE);
+        // username zone
+        txtNomUtilisateur = new JTextField(20);
         gbc.gridx = 0;
         gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        panneauPrincipal.add(lblNomUtilisateur, gbc);
-        txtNomUtilisateur = new JTextField(20);
-        gbc.gridx = 1;
-        gbc.gridy = 1;
+        gbc.gridwidth = 2;
         panneauPrincipal.add(txtNomUtilisateur, gbc);
         
-        // password
-        lblMotDePasse = new JLabel("Mot de passe:");
+        // mdp label
+        lblMotDePasse = new JLabel("Mot de passe");
         lblMotDePasse.setForeground(Color.WHITE);
+        lblMotDePasse.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.gridx = 0;
         gbc.gridy = 2;
+        gbc.gridwidth = 2;
         panneauPrincipal.add(lblMotDePasse, gbc);
-        txtMotDePasse = new JPasswordField(20);
-        gbc.gridx = 1;
-        gbc.gridy = 2;
-        panneauPrincipal.add(txtMotDePasse, gbc);
         
-        // Bouton Connexion
-        btnConnexion = new JButton("Se connecter");
-        btnConnexion.addActionListener(this);
+        // mdp zone
+        txtMotDePasse = new JPasswordField(20);
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.gridwidth = 2;
+        panneauPrincipal.add(txtMotDePasse, gbc);
+        
+        // Bouton submit
+        btnConnexion = new JButton("Soumettre");
+        btnConnexion.addActionListener(this);
+        btnConnexion.setPreferredSize(new Dimension(100, btnConnexion.getPreferredSize().height));
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.CENTER;
         panneauPrincipal.add(btnConnexion, gbc);
         
         // Message d'erreur
-        lblMessageErreur = new JLabel("Nom d'utilisateur ou mot de passe incorrect!");
+        lblMessageErreur = new JLabel("Accès refusé");
         lblMessageErreur.setForeground(Color.RED);
-        lblMessageErreur.setVisible(false); //Invisible!
+        lblMessageErreur.setHorizontalAlignment(SwingConstants.CENTER);
+        lblMessageErreur.setVisible(false);
         gbc.gridx = 0;
-        gbc.gridy = 4;
+        gbc.gridy = 5;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         panneauPrincipal.add(lblMessageErreur, gbc);
         
         add(panneauPrincipal);
@@ -99,24 +97,18 @@ import vue.GestionnaireVue;
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == btnConnexion) {
-            // get username
             String nomUtilisateur = txtNomUtilisateur.getText();
-
-            // get password
             String motDePasse = new String(txtMotDePasse.getPassword());
-            
-            // Verif de connexion
             Banque banque = Banque.getInstance();
             boolean connexionReussie = banque.verifier(nomUtilisateur, motDePasse);
             
-            if (connexionReussie) { //Tout reset
+            if (connexionReussie) {
                 banque.setUtilisateurActif(nomUtilisateur);
                 txtNomUtilisateur.setText("");
                 txtMotDePasse.setText("");
                 lblMessageErreur.setVisible(false);
                 gestionnaireVue.activerModeCompte();
             } else {
-                // Sinon montrer l'erreur
                 lblMessageErreur.setVisible(true);
             }
         }
